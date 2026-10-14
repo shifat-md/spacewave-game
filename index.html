@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Space Wave - Geometry Dash 60s Challenge</title>
+  <link rel="stylesheet" href="./dist/output.css">
+  <!-- Tailwind CSS CDN Fallback for instant browser preview -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .font-orbitron {
+      font-family: 'Orbitron', monospace, sans-serif;
+    }
+    .text-glow-cyan {
+      text-shadow: 0 0 10px #06b6d4, 0 0 25px rgba(6, 182, 212, 0.6);
+    }
+    .text-glow-pink {
+      text-shadow: 0 0 10px #ec4899, 0 0 25px rgba(236, 72, 153, 0.6);
+    }
+    .text-glow-amber {
+      text-shadow: 0 0 10px #f59e0b, 0 0 25px rgba(245, 158, 11, 0.6);
+    }
+    .text-glow-emerald {
+      text-shadow: 0 0 10px #10b981, 0 0 25px rgba(16, 185, 129, 0.6);
+    }
+    .box-glow-cyan {
+      box-shadow: 0 0 20px rgba(6, 182, 212, 0.35), inset 0 0 10px rgba(6, 182, 212, 0.2);
+    }
+    .box-glow-pink {
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.4), inset 0 0 10px rgba(236, 72, 153, 0.2);
+    }
+    .box-glow-amber {
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.2);
+    }
+    canvas {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="h-full w-full overflow-hidden select-none bg-slate-950 flex flex-col items-center justify-center p-0 m-0">
+
+  <!-- Main Game Frame -->
+  <div id="game-container" class="relative w-full h-full max-w-[1920px] max-h-[1080px] flex items-center justify-center overflow-hidden bg-black">
+    
+    <!-- Canvas for Gameplay -->
+    <canvas id="game-canvas" class="w-full h-full block cursor-pointer"></canvas>
+
+    <!-- Top In-Game HUD Overlay -->
+    <header id="hud" class="absolute top-0 left-0 right-0 p-4 pointer-events-none flex flex-col gap-2 transition-opacity duration-300">
+      <div class="flex items-center justify-between gap-4 max-w-5xl mx-auto w-full">
+        
+        <!-- Left Stats (Attempts & Mode) -->
+        <div class="flex items-center gap-3">
+          <div class="bg-slate-900/80 backdrop-blur-md border border-cyan-500/30 rounded-lg px-3 py-1.5 flex items-center gap-2 shadow-lg">
+            <span class="text-xs uppercase tracking-widest text-cyan-400 font-bold">Attempt</span>
+            <span id="hud-attempt" class="font-orbitron font-bold text-lg text-white">1</span>
+          </div>
+          <div id="hud-mode-badge" class="bg-slate-900/80 backdrop-blur-md border border-emerald-500/40 rounded-lg px-2.5 py-1.5 hidden items-center gap-1.5 text-xs text-emerald-400 font-bold uppercase tracking-wider shadow-lg">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Practice Mode
+          </div>
+        </div>
+
+        <!-- Center: 60s Progress Bar -->
+        <div class="flex-1 max-w-xl flex flex-col items-center gap-1">
+          <div class="flex justify-between w-full text-xs font-orbitron tracking-wider text-slate-300 px-1">
+            <span id="hud-time" class="text-cyan-400 font-bold">0.0s / 60.0s</span>
+            <span id="hud-phase-label" class="text-slate-400 uppercase text-[11px] tracking-widest hidden sm:inline">Sector 1: Lift Off</span>
+            <span id="hud-percent" class="text-cyan-300 font-bold text-sm">0%</span>
+          </div>
+          <div class="w-full h-3 bg-slate-900/90 rounded-full border border-slate-700/60 p-0.5 overflow-hidden shadow-inner relative">
+            <div id="hud-progress-fill" class="h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-full w-0 transition-all duration-75 relative">
+              <div class="absolute right-0 top-0 bottom-0 w-2 bg-white/80 rounded-full blur-[1px]"></div>
+            </div>
+            <!-- Marker at 60s Finish -->
+            <div class="absolute right-0 top-0 bottom-0 w-1 bg-amber-400 z-10 opacity-70"></div>
+          </div>
+        </div>
+
+        <!-- Right: Best & Controls -->
+        <div class="flex items-center gap-2 pointer-events-auto">
+          <div class="bg-slate-900/80 backdrop-blur-md border border-slate-700/60 rounded-lg px-3 py-1.5 hidden sm:flex items-center gap-1.5 shadow-lg">
+            <span class="text-xs uppercase tracking-wider text-slate-400">Best</span>
+            <span id="hud-best" class="font-orbitron font-bold text-base text-amber-400">0%</span>
+          </div>
+
+          <!-- Mute / Unmute Button -->
+          <button id="btn-sound-toggle" title="Toggle Sound (M)" class="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-700/60 text-slate-200 hover:text-cyan-400 transition-colors shadow-lg active:scale-95">
+            <svg id="icon-sound-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/>
+            </svg>
+            <svg id="icon-sound-off" class="w-5 h-5 hidden text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+            </svg>
+          </button>
+
+          <!-- Pause Button -->
+          <button id="btn-pause-toggle" title="Pause Game (Esc)" class="p-2 rounded-lg bg-slate-900/80 hover:bg-slate-800 border border-slate-700/60 text-slate-200 hover:text-cyan-400 transition-colors shadow-lg active:scale-95">
+            <svg id="icon-pause" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Practice Mode Controls Bar (visible only in practice mode) -->
+      <div id="practice-controls-bar" class="hidden pointer-events-auto max-w-sm mx-auto bg-slate-900/90 backdrop-blur-md border border-emerald-500/50 rounded-full px-4 py-1.5 items-center justify-between gap-3 text-xs shadow-xl">
+        <span class="text-emerald-400 font-bold uppercase tracking-wider">Practice:</span>
+        <button id="btn-place-checkpoint" class="px-2 py-0.5 bg-emerald-600/30 hover:bg-emerald-600/60 text-emerald-300 border border-emerald-500/40 rounded text-[11px] font-bold active:scale-95 transition-all">
+          + Place (Z)
+        </button>
+        <button id="btn-remove-checkpoint" class="px-2 py-0.5 bg-rose-600/30 hover:bg-rose-600/60 text-rose-300 border border-rose-500/40 rounded text-[11px] font-bold active:scale-95 transition-all">
+          - Delete (X)
+        </button>
+        <span id="practice-count" class="text-slate-400 text-[11px]">0 CP</span>
+      </div>
+
+      <!-- Sector / Speed Event Toast Announcement -->
+      <div id="event-toast" class="pointer-events-none self-center mt-6 py-2 px-6 rounded-full bg-slate-900/95 border border-cyan-400 text-cyan-300 font-orbitron font-bold text-sm sm:text-base tracking-widest shadow-2xl opacity-0 scale-90 transition-all duration-300 flex items-center gap-2">
+        <span id="event-toast-icon">⚡</span>
+        <span id="event-toast-text">SPEED 2X ACTIVATED!</span>
+      </div>
+    </header>
+
+    <!-- Start / Title Screen Overlay -->
+    <div id="screen-start" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-6 z-30 transition-all duration-300">
+      <div class="max-w-md w-full flex flex-col items-center text-center gap-6">
+        
+        <!-- Logo -->
+        <div class="flex flex-col items-center gap-1">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 bg-cyan-400 rotate-45 animate-spin"></span>
+            <span class="text-xs font-orbitron tracking-[0.4em] uppercase text-cyan-400 font-bold">GEOMETRY DASH STYLE</span>
+            <span class="w-3 h-3 bg-cyan-400 rotate-45 animate-spin"></span>
+          </div>
+          <h1 class="font-orbitron font-black text-5xl sm:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 tracking-wider text-glow-cyan">
+            SPACE WAVE
+          </h1>
+          <p class="text-slate-400 text-sm font-semibold tracking-wider uppercase mt-1">
+            Survive the 60-Second Cyber Highway
+          </p>
+        </div>
+
+        <!-- Wave Color Selector -->
+        <div class="flex flex-col items-center gap-2 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 w-full">
+          <span class="text-xs text-slate-400 uppercase tracking-widest font-bold">Select Wave Core Energy</span>
+          <div id="color-picker-group" class="flex items-center justify-center gap-3">
+            <button data-color="cyan" class="color-swatch w-9 h-9 rounded-full bg-cyan-400 border-2 border-white ring-4 ring-cyan-500/40 active:scale-95 transition-transform" title="Cyan Wave"></button>
+            <button data-color="magenta" class="color-swatch w-9 h-9 rounded-full bg-pink-500 border-2 border-transparent hover:border-white active:scale-95 transition-transform" title="Magenta Wave"></button>
+            <button data-color="emerald" class="color-swatch w-9 h-9 rounded-full bg-emerald-400 border-2 border-transparent hover:border-white active:scale-95 transition-transform" title="Emerald Wave"></button>
+            <button data-color="amber" class="color-swatch w-9 h-9 rounded-full bg-amber-400 border-2 border-transparent hover:border-white active:scale-95 transition-transform" title="Amber Wave"></button>
+            <button data-color="purple" class="color-swatch w-9 h-9 rounded-full bg-purple-500 border-2 border-transparent hover:border-white active:scale-95 transition-transform" title="Violet Wave"></button>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-col gap-3 w-full">
+          <button id="btn-start-game" class="group relative w-full py-4 px-8 rounded-xl font-orbitron font-black text-lg tracking-wider text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+            LAUNCH MISSION (60s)
+            <div class="absolute inset-0 rounded-xl border border-white/30 pointer-events-none"></div>
+          </button>
+          
+          <button id="btn-start-practice" class="w-full py-3 px-6 rounded-xl font-orbitron font-bold text-sm tracking-wider text-emerald-300 bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-500/50 hover:border-emerald-400 shadow-lg shadow-emerald-500/10 hover:scale-[1.01] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            PRACTICE MODE (CHECKPOINTS)
+          </button>
+        </div>
+
+        <!-- Controls Guide Card -->
+        <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3.5 w-full text-xs text-slate-300 flex flex-col gap-2">
+          <div class="font-bold uppercase tracking-wider text-slate-400 text-[11px]">Flight Controls</div>
+          <div class="grid grid-cols-2 gap-2 text-left">
+            <div class="flex items-center gap-2 bg-slate-950/70 p-2 rounded-lg border border-slate-800">
+              <span class="px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-500/50 text-cyan-300 font-mono font-bold text-[10px]">HOLD</span>
+              <span>Ascend 45°</span>
+            </div>
+            <div class="flex items-center gap-2 bg-slate-950/70 p-2 rounded-lg border border-slate-800">
+              <span class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-600 text-slate-300 font-mono font-bold text-[10px]">RELEASE</span>
+              <span>Descend 45°</span>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-400 text-center mt-1">
+            Keys: <span class="text-cyan-300 font-bold">SPACE</span>, <span class="text-cyan-300 font-bold">W</span>, <span class="text-cyan-300 font-bold">UP ARROW</span>, or <span class="text-cyan-300 font-bold">LEFT CLICK / TAP</span>
+          </div>
+        </div>
+
+        <!-- Best Score & Stats -->
+        <div class="flex items-center justify-between w-full text-xs text-slate-400 px-2 font-mono">
+          <span>HIGH SCORE: <strong id="menu-best-score" class="text-amber-400">0%</strong></span>
+          <span>ATTEMPTS: <strong id="menu-total-attempts" class="text-white">0</strong></span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Game Over Screen Overlay -->
+    <div id="screen-gameover" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-6 z-30 hidden transition-all duration-300">
+      <div class="max-w-md w-full flex flex-col items-center text-center gap-5">
+        
+        <div class="flex flex-col items-center gap-1">
+          <span class="text-rose-400 font-bold uppercase tracking-widest text-xs font-orbitron">SIGNAL LOST</span>
+          <h2 class="font-orbitron font-black text-5xl text-rose-500 text-glow-pink tracking-wider">
+            CRASHED
+          </h2>
+        </div>
+
+        <!-- Progress Card -->
+        <div class="bg-slate-900/90 border border-rose-500/30 rounded-2xl p-5 w-full flex flex-col gap-4 box-glow-pink">
+          <div class="flex justify-between items-baseline border-b border-slate-800 pb-3">
+            <span class="text-slate-400 text-sm uppercase tracking-wider">Progress</span>
+            <span id="gameover-percent" class="font-orbitron font-black text-4xl text-white">43%</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 text-left">
+            <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+              <span class="text-[11px] text-slate-400 uppercase tracking-wider block">Time Survived</span>
+              <span id="gameover-time" class="font-orbitron font-bold text-base text-cyan-400">25.8s</span>
+            </div>
+            <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+              <span class="text-[11px] text-slate-400 uppercase tracking-wider block">Attempt</span>
+              <span id="gameover-attempt" class="font-orbitron font-bold text-base text-white">#12</span>
+            </div>
+          </div>
+
+          <!-- New Best Record Badge -->
+          <div id="gameover-new-best" class="hidden py-1 px-3 bg-amber-500/20 border border-amber-500/50 rounded-lg text-amber-300 font-orbitron text-xs font-bold tracking-widest uppercase items-center justify-center gap-1.5 animate-bounce">
+            ★ NEW BEST RECORD! ★
+          </div>
+        </div>
+
+        <!-- Retry and Return buttons -->
+        <div class="flex flex-col gap-2.5 w-full">
+          <button id="btn-retry" class="w-full py-4 px-8 rounded-xl font-orbitron font-black text-lg tracking-wider text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 shadow-lg shadow-rose-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+            TRY AGAIN (SPACE)
+          </button>
+          
+          <div class="flex gap-2 w-full">
+            <button id="btn-practice-from-gameover" class="flex-1 py-2.5 px-4 rounded-xl font-orbitron font-bold text-xs tracking-wider text-emerald-300 bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/40 transition-all">
+              SWITCH TO PRACTICE
+            </button>
+            <button id="btn-menu-from-gameover" class="flex-1 py-2.5 px-4 rounded-xl font-orbitron font-bold text-xs tracking-wider text-slate-300 bg-slate-900 hover:bg-slate-800 border border-slate-700 transition-all">
+              MAIN MENU
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Victory Screen Overlay -->
+    <div id="screen-victory" class="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 z-30 hidden transition-all duration-300">
+      <div class="max-w-md w-full flex flex-col items-center text-center gap-5">
+        
+        <div class="flex flex-col items-center gap-1">
+          <div class="flex items-center gap-2 text-amber-400">
+            <span>★</span>
+            <span class="text-xs font-orbitron uppercase tracking-[0.3em] font-bold">MISSION CONQUERED</span>
+            <span>★</span>
+          </div>
+          <h2 class="font-orbitron font-black text-5xl sm:text-6xl text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-orange-500 text-glow-amber">
+            100% COMPLETE!
+          </h2>
+          <p class="text-emerald-400 font-bold tracking-wider text-sm">
+            YOU MASTERED THE 60-SECOND SPACE WAVE!
+          </p>
+        </div>
+
+        <!-- Victory Stats Card -->
+        <div class="bg-slate-900/90 border border-amber-500/40 rounded-2xl p-5 w-full flex flex-col gap-4 box-glow-amber">
+          <div class="grid grid-cols-2 gap-3 text-left">
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <span class="text-[11px] text-slate-400 uppercase tracking-wider block">Total Attempts</span>
+              <span id="victory-attempts" class="font-orbitron font-black text-2xl text-white">1</span>
+            </div>
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+              <span class="text-[11px] text-slate-400 uppercase tracking-wider block">Flight Time</span>
+              <span class="font-orbitron font-black text-2xl text-amber-400">60.0s</span>
+            </div>
+          </div>
+          <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+            <span class="text-xs text-slate-400 uppercase tracking-wider">Crystals Collected</span>
+            <span id="victory-coins" class="font-orbitron font-bold text-lg text-cyan-300">0 / 10</span>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex flex-col gap-2.5 w-full">
+          <button id="btn-replay" class="w-full py-4 px-8 rounded-xl font-orbitron font-black text-lg tracking-wider text-slate-950 bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200 shadow-lg shadow-amber-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
+            PLAY AGAIN
+          </button>
+          <button id="btn-menu-from-victory" class="w-full py-2.5 px-4 rounded-xl font-orbitron font-bold text-xs tracking-wider text-slate-300 bg-slate-900 hover:bg-slate-800 border border-slate-700 transition-all">
+            MAIN MENU
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Pause Screen Overlay -->
+    <div id="screen-pause" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center p-6 z-30 hidden transition-all duration-300">
+      <div class="max-w-sm w-full flex flex-col items-center text-center gap-5 bg-slate-900/90 border border-slate-700 rounded-2xl p-6 shadow-2xl">
+        <h3 class="font-orbitron font-black text-3xl text-cyan-400 tracking-wider">
+          PAUSED
+        </h3>
+        <div class="flex flex-col gap-3 w-full">
+          <button id="btn-resume" class="w-full py-3 px-6 rounded-xl font-orbitron font-bold text-base text-white bg-cyan-600 hover:bg-cyan-500 active:scale-95 transition-all">
+            RESUME
+          </button>
+          <button id="btn-restart-pause" class="w-full py-3 px-6 rounded-xl font-orbitron font-bold text-base text-slate-300 bg-slate-800 hover:bg-slate-700 active:scale-95 transition-all">
+            RESTART RUN
+          </button>
+          <button id="btn-menu-from-pause" class="w-full py-2.5 px-4 rounded-xl font-orbitron font-bold text-xs text-slate-400 hover:text-white transition-all">
+            MAIN MENU
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="./index.js"></script>
+</body>
+</html>

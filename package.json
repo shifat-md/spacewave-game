@@ -1,0 +1,19 @@
+{
+  "name": "space-wave",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx -y serve . -l 3000",
+    "build:css": "tailwindcss -i ./src/style.css -o ./dist/output.css --minify",
+    "watch:css": "tailwindcss -i ./src/style.css -o ./dist/output.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

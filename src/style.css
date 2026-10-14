@@ -1,0 +1,32 @@
+@import "tailwindcss";
+@source "../index.html";
+@source "../index.js";
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+    background-color: #030712;
+    color: #f8fafc;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+}
+
+/* Custom Neon Glow Utilities */
+.neon-glow-cyan {
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.5), inset 0 0 15px rgba(6, 182, 212, 0.2);
+}
+.neon-glow-pink {
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.5), inset 0 0 15px rgba(236, 72, 153, 0.2);
+}
+.neon-glow-amber {
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.5), inset 0 0 15px rgba(245, 158, 11, 0.2);
+}
+.neon-text-glow {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 35px currentColor;
+}
